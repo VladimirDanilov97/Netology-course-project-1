@@ -7,6 +7,9 @@ from pprint import pprint
 import json
 import datetime
 import time 
+from progress.bar import IncrementalBar
+
+
 class Vk():
     url = 'https://api.vk.com/method/'
     def __init__(self, token, version):
@@ -78,7 +81,7 @@ class Yandex():
         }
         response = requests.put(url, headers=headers, params=params, timeout=3)
         if 200 <=response.status_code < 300:
-            print('Success')
+            return 'Create folder successfuly'
 
     def upload(self, file_url, filename, path='/course_project_1/'):
         url = self.url + 'resources/upload'
@@ -90,24 +93,24 @@ class Yandex():
         headers = self.headers
         self.create_folder(path)
         response = requests.post(url, headers=headers, params=params, timeout=5)
-        time.sleep(1)
         if 200 <= response.status_code < 300:
-            print(f'{filename} upload successfully')
+           return f'{filename} upload successfully'
         else:
-            print(response.status_code)
-
+            return response.status_code
 
 def upload_vk_photos(id, vk_token, yd_token, path='/course_project_1/', number_of_photo=5):
     vk_client = Vk(VK_TOKEN, '5.131')
     yandex_client = Yandex(YD_TOKEN)
     photos_to_upload = sorted(vk_client.get_maxsized_photo(str(id)), key=lambda i: i['max_size'], reverse=True)[:number_of_photo]
-
+    bar = IncrementalBar('Files uploaded', max=len(photos_to_upload))
     for photo in photos_to_upload:
         yandex_client.upload(photo['url'], photo['file_name'], path)
+        bar.next()
+    bar.finish()
 
 if __name__ == '__main__':
     # vk_client = Vk(VK_TOKEN, '5.131')
     # yandex_client = Yandex(YD_TOKEN)
     # photos_to_upload = sorted(vk_client.get_maxsized_photo('552934290'), key=lambda i: i['max_size'], reverse=True)
     # pprint(photos_to_upload)
-    upload_vk_photos('72834277', VK_TOKEN, YD_TOKEN, number_of_photo=3)
+    upload_vk_photos('552934290', VK_TOKEN, YD_TOKEN, number_of_photo=3)
