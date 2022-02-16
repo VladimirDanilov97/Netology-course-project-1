@@ -1,2 +1,6 @@
 tokens.py
 env/
+*.png
+*.jpg
+*.json
+__pycache__/

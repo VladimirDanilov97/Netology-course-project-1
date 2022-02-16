@@ -1,9 +1,9 @@
+from mimetypes import MimeTypes
 from sys import maxsize
 from urllib import response
 from wsgiref import headers
 import requests
 from tokens import YD_TOKEN, VK_TOKEN, VK_ID
-from pprint import pprint
 import json
 import datetime
 import time 
@@ -34,8 +34,8 @@ class Vk():
         return req['response']['items']
 
 
-    def get_maxsized_photo(self, owner_id=None):
-        photos = self.get_photo_by_id(owner_id=owner_id)
+    def get_maxsized_photo(self, owner_id=None, album_id='profile', ):
+        photos = self.get_photo_by_id(owner_id=owner_id, album_id=album_id)
         result = []
         names = set()
         for item in photos:
@@ -64,14 +64,7 @@ class Yandex():
         self.headers = {
             "Authorization": f'OAuth {token}'
         }
-    
-    def get_file_list(self, path='/course_project_1/'):
-        url = self.url + 'resources/files'
-        headers = self.headers
-        response = requests.get(url, headers=headers, timeout=3).json()
-        filtered_by_path_response = list(filter(lambda x: path in x['path'], response['items']))
-        return filtered_by_path_response
-    
+
 
     def create_folder(self, path):
         url = self.url + 'resources'
@@ -98,19 +91,44 @@ class Yandex():
         else:
             return response.status_code
 
-def upload_vk_photos(id, vk_token, yd_token, path='/course_project_1/', number_of_photo=5):
+def upload_vk_photos(id, vk_token, yd_token, album_id='profile', path='/course_project_1/', number_of_photo=5):
     vk_client = Vk(VK_TOKEN, '5.131')
     yandex_client = Yandex(YD_TOKEN)
-    photos_to_upload = sorted(vk_client.get_maxsized_photo(str(id)), key=lambda i: i['max_size'], reverse=True)[:number_of_photo]
+    photos_to_upload = sorted(vk_client.get_maxsized_photo(str(id), album_id=album_id), key=lambda i: i['max_size'], reverse=True)[:number_of_photo]
     bar = IncrementalBar('Files uploaded', max=len(photos_to_upload))
     for photo in photos_to_upload:
         yandex_client.upload(photo['url'], photo['file_name'], path)
         bar.next()
     bar.finish()
+    with open('output.json', 'w') as file:
+        json.dump([{'name': x['file_name'], 'size': x['size_type']} for x in photos_to_upload], file, indent=4)
+    
+class GoogleDrive():
+    
+    url = "https://www.googleapis.com/upload/drive/v3/files?uploadType="
+    def __init__(self, token):
+        self.headers={
+           'Authorization': f'Bearer {token}',
+        }
+
+    def upload(self):
+        params={
+            'name': 'sample',    
+            'parents': ['1QcTNN7UteEtKIHoIvEMz6QLR6Uy8Mg5r']
+        }
+        url = self.url+'multipart'
+        files = {
+            'data': ('metadata', json.dumps(params), 'application/json; charset=UTF-8'),
+            'file': open('./sample.jpg', 'rb'),
+        }
+        headers = self.headers
+        response = requests.post(url, headers=headers, files=files, timeout=5)
+        return response
+
 
 if __name__ == '__main__':
     # vk_client = Vk(VK_TOKEN, '5.131')
     # yandex_client = Yandex(YD_TOKEN)
     # photos_to_upload = sorted(vk_client.get_maxsized_photo('552934290'), key=lambda i: i['max_size'], reverse=True)
     # pprint(photos_to_upload)
-    upload_vk_photos('552934290', VK_TOKEN, YD_TOKEN, number_of_photo=3)
+    upload_vk_photos('137290284', VK_TOKEN, YD_TOKEN, number_of_photo=3)
