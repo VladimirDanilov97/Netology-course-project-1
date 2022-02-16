@@ -1,14 +1,8 @@
-from mimetypes import MimeTypes
-from random import sample
-from sys import maxsize
-from urllib import response
-from wsgiref import headers
 import requests
-from tokens import YD_TOKEN, VK_TOKEN, GD_TOKEN
 import json
 import datetime
-import time 
 from progress.bar import IncrementalBar
+from tokens import YD_TOKEN, VK_TOKEN, GD_TOKEN, INST_TOKEN
 
 
 class Vk():
@@ -63,7 +57,7 @@ class Yandex():
     url = url = 'https://cloud-api.yandex.net/v1/disk/'
     def __init__(self, token):
         self.headers = {
-            "Authorization": f'OAuth {token}'
+            "Authorization": f'{token}'
         }
 
 
@@ -113,7 +107,10 @@ class GoogleDrive():
         }
         headers = self.headers
         response = requests.post(url, headers=headers, files=files, timeout=5)
-        return response
+        if 200 <= response.status_code < 300:
+           return f'{file_name} upload successfully'
+        else:
+            return response.status_code
 
 
 def upload_vk_photos(id, drive, vk_token, token, album_id='profile', path='/course_project_1/', number_of_photo=5):
@@ -135,10 +132,6 @@ def upload_vk_photos(id, drive, vk_token, token, album_id='profile', path='/cour
 
 
 if __name__ == '__main__':
-    
-    file_name = 'sample.jpg'
-    path = ['1QcTNN7UteEtKIHoIvEMz6QLR6Uy8Mg5r']
-    file_url = 'https://pbs.twimg.com/media/EHAdYEyWwAgnnql.jpg:large'
- 
+    path = ['1QcTNN7UteEtKIHoIvEMz6QLR6Uy8Mg5r'] 
     upload_vk_photos('552934290', 'Google', VK_TOKEN, GD_TOKEN, path=path, number_of_photo=3)
     upload_vk_photos('552934290', 'Yandex', VK_TOKEN, YD_TOKEN, number_of_photo=3)
