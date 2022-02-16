@@ -113,7 +113,7 @@ class GoogleDrive():
             return response.status_code
 
 
-def upload_vk_photos(id, drive, vk_token, token, album_id='profile', path='/course_project_1/', number_of_photo=5):
+def upload_photos_from_vk(id, drive, vk_token, token, album_id='profile', path='/course_project_1/', number_of_photo=5):
     vk_client = Vk(VK_TOKEN, '5.131')
     if drive == 'Google':
         client = GoogleDrive(token)
@@ -133,5 +133,5 @@ def upload_vk_photos(id, drive, vk_token, token, album_id='profile', path='/cour
 
 if __name__ == '__main__':
     path = ['1QcTNN7UteEtKIHoIvEMz6QLR6Uy8Mg5r'] 
-    upload_vk_photos('552934290', 'Google', VK_TOKEN, GD_TOKEN, path=path, number_of_photo=3)
-    upload_vk_photos('552934290', 'Yandex', VK_TOKEN, YD_TOKEN, number_of_photo=3)
+    upload_photos_from_vk('552934290', 'Google', VK_TOKEN, GD_TOKEN, path=path, number_of_photo=3)
+    upload_photos_from_vk('552934290', 'Yandex', VK_TOKEN, YD_TOKEN, number_of_photo=3)
