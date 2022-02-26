@@ -3,9 +3,6 @@ import json
 import datetime
 from progress.bar import IncrementalBar
 
-from tokens import VK_TOKEN
-# from tokens import YD_TOKEN, VK_TOKEN, GD_TOKEN
-
 
 class Vk():
     url = 'https://api.vk.com/method/'
@@ -155,7 +152,7 @@ if __name__ == '__main__':
                                 number_of_photo=number_of_photo)
     drive = input('Input "Google" or "Yandex" drive to use: ')
     path = input('Input path to upload photos: ')
- 
+
     while True:
         if drive == 'Google':
             token = input('Input Google drive access token: ')
