@@ -162,5 +162,5 @@ if __name__ == '__main__':
             token = os.getenv('YD_TOKEN')
             upload_photos(photos, 'Yandex', token, path=path)
             break
-        else
+        else:
             print('You should input "Google" or "Yandex"')
