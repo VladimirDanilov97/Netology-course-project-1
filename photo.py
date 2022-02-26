@@ -2,7 +2,9 @@ import requests
 import json
 import datetime
 from progress.bar import IncrementalBar
-from tokens import YD_TOKEN, VK_TOKEN, GD_TOKEN
+
+from tokens import VK_TOKEN
+# from tokens import YD_TOKEN, VK_TOKEN, GD_TOKEN
 
 
 class Vk():
@@ -117,22 +119,24 @@ class GoogleDrive():
             return response.status_code
 
 
-def upload_photos_from_vk(id, drive, vk_token, token,
-                          album_id='profile',
-                          path='/course_project_1/',
-                          number_of_photo=5):
+def get_photos_from_vk(id, vk_token,
+                       album_id='profile',
+                       number_of_photo=5):
     vk_client = Vk(VK_TOKEN, '5.131')
-    if drive == 'Google':
-        client = GoogleDrive(token)
-    elif drive == 'Yandex':
-        client = Yandex(token)
-
     album_photos = vk_client.get_maxsized_photo(str(id), album_id=album_id)
     photos_to_upload = sorted(album_photos,
                               key=lambda i: i['max_size'],
                               reverse=True)[:number_of_photo]
-    bar = IncrementalBar('Files uploaded', max=len(photos_to_upload))
-    for photo in photos_to_upload:
+    return photos_to_upload
+
+
+def upload_photos(photos, drive, token, path='/course_project_1/'):
+    if drive == 'Google':
+        client = GoogleDrive(token)
+    elif drive == 'Yandex':
+        client = Yandex(token)
+    bar = IncrementalBar('Files uploaded', max=len(photos))
+    for photo in photos:
         client.upload(photo['url'], photo['file_name'], path)
         bar.next()
     bar.finish()
@@ -140,14 +144,26 @@ def upload_photos_from_vk(id, drive, vk_token, token,
         json.dump([{
                     'name': x['file_name'],
                     'size': x['size_type']
-                    } for x in photos_to_upload], file, indent=4)
+                    } for x in photos], file, indent=4)
 
 
 if __name__ == '__main__':
-    path = ['1QcTNN7UteEtKIHoIvEMz6QLR6Uy8Mg5r']
-    upload_photos_from_vk('552934290', 'Google',
-                          VK_TOKEN, GD_TOKEN,
-                          path=path, number_of_photo=3)
-    upload_photos_from_vk('552934290', 'Yandex',
-                          VK_TOKEN, YD_TOKEN,
-                          number_of_photo=3)
+    id = input('Input vk page id: ')
+    VK_TOKEN = input('Input vk access token page id: ')
+    number_of_photo = int(input('Input number of photos to upload: '))
+    photos = get_photos_from_vk(id, VK_TOKEN,
+                                number_of_photo=number_of_photo)
+    drive = input('Input "Google" or "Yandex" drive to use: ')
+    path = input('Input path to upload photos: ')
+ 
+    while True:
+        if drive == 'Google':
+            token = input('Input Google drive access token: ')
+            upload_photos(photos, 'Google', token, path=path)
+            break
+        elif drive == 'Yandex':
+            token = input('Input Yandex drive access token: ')
+            upload_photos(photos, 'Yandex', token, path=path)
+            break
+        else:
+            print('You should input "Google" or "Yandex"')
