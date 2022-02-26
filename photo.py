@@ -2,7 +2,7 @@ import requests
 import json
 import datetime
 from progress.bar import IncrementalBar
-
+import os
 
 class Vk():
     url = 'https://api.vk.com/method/'
@@ -146,7 +146,7 @@ def upload_photos(photos, drive, token, path='/course_project_1/'):
 
 if __name__ == '__main__':
     id = input('Input vk page id: ')
-    VK_TOKEN = input('Input vk access token page id: ')
+    VK_TOKEN = os.getenv('VK_TOKEN')
     number_of_photo = int(input('Input number of photos to upload: '))
     photos = get_photos_from_vk(id, VK_TOKEN,
                                 number_of_photo=number_of_photo)
@@ -155,12 +155,12 @@ if __name__ == '__main__':
 
     while True:
         if drive == 'Google':
-            token = input('Input Google drive access token: ')
+            token = os.getenv('GD_TOKEN')
             upload_photos(photos, 'Google', token, path=path)
             break
         elif drive == 'Yandex':
-            token = input('Input Yandex drive access token: ')
+            token = os.getenv('YD_TOKEN')
             upload_photos(photos, 'Yandex', token, path=path)
             break
-        else:
+        else
             print('You should input "Google" or "Yandex"')
